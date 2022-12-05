@@ -19,7 +19,7 @@ on:
         default: ''
       Tempoary_FLAG:
         description: '固件标签 [可选]'
-        default: ''
+        default: 'Web'
 ### 控制部分结束 ( 以上内容请保持不变 )
 
   #push:
@@ -30,7 +30,7 @@ on:
   #  - cron: 0 8 * * 5
 
   #watch:
-  #  types: [started]
+    types: [started]
 
 ### 环境变量设置
 env:
@@ -212,24 +212,4 @@ jobs:
         tag: AutoUpdate
         overwrite: true
         
-    - name: Download Github API
-      if: env.UPLOAD_RELEASES == 'true' && env.Compile_Result == 'true' && !cancelled()
-      run: |
-        wget https://api.github.com/repos/${{github.repository}}/releases/tags/AutoUpdate -O API
-        
-    - name: Upload Github API to Release
-      if: env.UPLOAD_RELEASES == 'true' && env.Compile_Result == 'true' && !cancelled()
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./API
-        file_glob: true
-        tag: AutoUpdate
-        overwrite: true
 
-    - name: Delete old Workflow Runs
-      uses: GitRML/delete-workflow-runs@main
-      if: env.DELETE_OLD_WORKFLOW == 'true' && !cancelled()
-      with:
-        retain_days: 1
-        keep_minimum_runs: 3
