@@ -4,7 +4,7 @@
 #   Author: Hyy2001X                                      #
 ###########################################################
 
-name: NEWIFI D2
+name: newifi-d2new1
 
 ### 以下内容请保持不变 ( 请修改下方的 [环境变量设置] )
 on:
@@ -19,7 +19,7 @@ on:
         default: ''
       Tempoary_FLAG:
         description: '固件标签 [可选]'
-        default: ''
+        default: 'Web'
 ### 控制部分结束 ( 以上内容请保持不变 )
 
   #push:
@@ -54,7 +54,7 @@ env:
 
 jobs:
   Compile:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
@@ -190,14 +190,15 @@ jobs:
 
     - name: Upload Firmware to Artifacts
       uses: actions/upload-artifact@main
-      if: env.UPLOAD_ARTIFACTS == 'true' && env.Compile_Result == 'true' && !cancelled()
       with:
-        name: ${{ env.CONFIG_FILE }}_firmware_${{ env.Compile_Date }}
+        name: Firmware
         path: openwrt/bin/Firmware
 
     - name: Upload bin to Artifacts
       uses: actions/upload-artifact@main
-      if: env.UPLOAD_BIN_ARTIFACTS == 'true' && env.Compile_Result == 'true' && !cancelled()
       with:
-        name: ${{ env.CONFIG_FILE }}_bin_${{ env.Compile_Date }}
+        name: bin
         path: openwrt/bin
+
+
+
