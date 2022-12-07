@@ -4,7 +4,7 @@
 #   Author: Hyy2001X                                      #
 ###########################################################
 
-name: newifi-d2
+name: NEWIFI D2
 
 ### 以下内容请保持不变 ( 请修改下方的 [环境变量设置] )
 on:
@@ -19,7 +19,7 @@ on:
         default: ''
       Tempoary_FLAG:
         description: '固件标签 [可选]'
-        default: 'Web'
+        default: ''
 ### 控制部分结束 ( 以上内容请保持不变 )
 
   #push:
@@ -190,15 +190,46 @@ jobs:
 
     - name: Upload Firmware to Artifacts
       uses: actions/upload-artifact@main
+      if: env.UPLOAD_ARTIFACTS == 'true' && env.Compile_Result == 'true' && !cancelled()
       with:
-        name: Firmware
+        name: ${{ env.CONFIG_FILE }}_firmware_${{ env.Compile_Date }}
         path: openwrt/bin/Firmware
 
     - name: Upload bin to Artifacts
       uses: actions/upload-artifact@main
+      if: env.UPLOAD_BIN_ARTIFACTS == 'true' && env.Compile_Result == 'true' && !cancelled()
       with:
-        name: bin
+        name: ${{ env.CONFIG_FILE }}_bin_${{ env.Compile_Date }}
         path: openwrt/bin
 
+    - name: Upload Firmware to Release
+      uses: svenstaro/upload-release-action@v2
+      if: env.UPLOAD_RELEASES == 'true' && env.Compile_Result == 'true' && !cancelled()
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: openwrt/bin/Firmware/*
+        file_glob: true
+        tag: AutoUpdate
+        overwrite: true
+        
+    - name: Download Github API
+      if: env.UPLOAD_RELEASES == 'true' && env.Compile_Result == 'true' && !cancelled()
+      run: |
+        wget https://api.github.com/repos/${{github.repository}}/releases/tags/AutoUpdate -O API
+        
+    - name: Upload Github API to Release
+      if: env.UPLOAD_RELEASES == 'true' && env.Compile_Result == 'true' && !cancelled()
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./API
+        file_glob: true
+        tag: AutoUpdate
+        overwrite: true
 
-
+    - name: Delete old Workflow Runs
+      uses: GitRML/delete-workflow-runs@main
+      if: env.DELETE_OLD_WORKFLOW == 'true' && !cancelled()
+      with:
+        retain_days: 1
+        keep_minimum_runs: 3
